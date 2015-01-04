@@ -7,4 +7,4 @@ var test = function(){
     console.log('ip info for:%s - %s',ip, JSON.stringify(d));
 }
 // IpParser.init('resources/ips.dat', test);
-IpParser.init('/tmp/ip.txt', test);
+IpParser.init('/etc/voice/IP2LOCATION-LITE-DB11.CSV.cpp.txt', test);
