@@ -1,0 +1,11 @@
+{
+  "name": "ipparser",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "start": "node ipparser.js"
+  },
+  "dependencies": {
+    "functional-red-black-tree":"1.0.1"
+  }
+}
