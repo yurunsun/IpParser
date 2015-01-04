@@ -38,8 +38,8 @@ var init = function(path, callback){
             country: args[3],
             province: args[4],
             city: args[5],
-            long: Number(args[6]),
-            lat: Number(args[7])
+            long: args[6],
+            lat: args[7]
         }
         t1 = t1.insert(data.startIp, data);
         t1 = t1.insert(data.endIp, data);
@@ -47,7 +47,7 @@ var init = function(path, callback){
 
     rl.on('close', function(){
         var elapsed = new Date().getTime() - started;
-        console.log('IP data loaded, items:%s elapsed:%sms', t1.length, elapsed);
+        console.log('IP data loaded, items:%s elapsed:%sms', t1.length /2, elapsed);
         ipsTree = t1;
         if (callback){
             callback();
