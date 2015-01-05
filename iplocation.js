@@ -17,25 +17,44 @@ function onRequest(req, res) {
 	var urlObj = url.parse(req.url, true);
 	console.log("request " + urlObj.href + " from " + req.connection.remoteAddress);
 	
-	if (urlObj.pathname == "/iplocation") {
-		return onIPLocationRequest(urlObj.query, res);
-	} 
-	res.write("T______T... WTF");
+	var replyMsg = "<head>505 Internal Error</head>";
+	do {
+		if (urlObj.pathname != "/iplocation") {
+			break;
+		}
+		if (urlObj.query.ip) {
+			replyMsg = getGeoInfo(urlObj.query.ip);
+			break;
+		}
+		if (urlObj.query.ips) {
+			replyMsg = getGeoInfoBatch(urlObj.query.ips);
+			break;
+		}
+	} while (false);
+	
+	res.write(replyMsg);
 	res.end();
 }
 
-function onIPLocationRequest(query, res) {
-	var ip = query.ip;
-	if (!ip) {
-		console.log("incomplete query parameter");
-		res.write("T______T... WTF");
-		res.end();
-		return;
+function getGeoInfo(ip) {
+	var location = IPParser.getIpInfo(ipToInt(ip));
+	return JSON.stringify(location);
+}
+
+function getGeoInfoBatch(ips) {
+	var ipsArr = ips.split(',');
+	if (ipsArr.length == 0) {
+		return "fail to split ips into array " + ips;
 	}
-	var intIP = ipToInt(ip);
-	var location = IPParser.getIpInfo(intIP);
-	res.write(JSON.stringify(location));
-	res.end();
+	
+	var ret = [];
+	var MAX_BATCH_COUNT = 100;
+	for (var i in ipsArr) {
+		var location = IPParser.getIpInfo(ipToInt(ipsArr[i]));
+		ret.push(location);
+		if (i > MAX_BATCH_COUNT) break;
+	}
+	return JSON.stringify(ret);
 }
 
 function ipToInt(ip) {
