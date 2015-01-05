@@ -7,9 +7,6 @@ var ipsTree = undefined;
 
 var init = function(path, callback){
     var instream = fs.createReadStream(path);
-    var outstream = new stream;
-    outstream.readable = true;
-    outstream.writable = true;
 
     var rl = readline.createInterface({
         input: instream,
@@ -26,26 +23,24 @@ var init = function(path, callback){
             return;
         }
 
-        var args = line.split(" ");
-        if (args.length !== 10){
-            console.log("malformed ip data:", line);
-        };
+        var idx = line.indexOf(" ");
+        var startIp = Number(line.substring(0,idx));
 
-        var data = {
-            startIp: Number(args[0]),
-            endIp: Number(args[1]),
-            countrySht: args[2],
-            country: args[3],
-            province: args[4],
-            city: args[5],
-            long: args[6],
-            lat: args[7]
-        }
-        t1 = t1.insert(data.startIp, data);
-        t1 = t1.insert(data.endIp, data);
+        var idx2 = line.indexOf(" ", idx+1);
+        var endIp = Number(line.substring(idx+1,idx2));
+        line = line.substring(idx2+1);
+        // var data = {
+        //     countrySht: args[2],
+        //     province: args[4],
+        //     city: args[5]
+        // };
+
+        t1 = t1.insert(startIp, line);
+        t1 = t1.insert(endIp, line);
     });
 
     rl.on('close', function(){
+        instream.close();
         var elapsed = new Date().getTime() - started;
         console.log('IP data loaded, items:%s elapsed:%sms', t1.length /2, elapsed);
         ipsTree = t1;
@@ -64,8 +59,26 @@ var getIpInfo = function(ipInt){
 
     var v1 = ipsTree.ge(ipInt).value;
     var v2 = ipsTree.le(ipInt).value;
-    return v1 !== v2 ? null: v1;
+    console.log(v1, v2);
+    return v1 !== v2 ? null: parseInfo(v1);
 }
+
+var parseInfo = function(ipInfo){
+    var args = ipInfo.split(" ");
+    if (args.length<8){
+        console.log("malformed ip info:", ipInfo);
+        return null;
+    }
+    var res = {
+        countrySht: args[0],
+        country: args[1],
+        province: args[2],
+        city: args[3],
+        long: args[4],
+        lat: args[5]
+    }
+    return res;
+};
 
 module.exports.init = init;
 module.exports.getIpInfo = getIpInfo;
